@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700;800&display=swap');
+* {
+    font-family: "Work Sans", Arial, Helvetica, sans-serif
+}
+body {
+    margin: 0;
+}
+p {
+    font-weight: 300;
+    border-right: white solid 2px;
+    width: 80px;
+    margin-left: 1em;
+    position: fixed;
+    padding: 0 .2em;
+}
+ h1 {
+    padding: .5em;
+    text-align: center;
+    font-size: 5em;
+    font-weight: 300;
+ }
+ #portfolio {
+     padding: 0;
+ }
+ #title {
+     font-weight: 400;
+ }
+ #btitle {
+     font-weight: 200;
+     text-shadow: 0 0 5px rgb(254, 222, 255), 0 0 10px #f8a7ff, 0 0 80px #f584ff;
+     margin: 0;
+ }
+ .inputs {
+     display: flex;
+     flex-direction: row-reverse;
+     margin: auto;
+ }
+ input {
+    height: 2em;
+    margin: .5em auto;
+    text-transform: capitalize;
+    border-radius: 1em;
+    border: none;
+    padding: 1em;
+    background-color: rgb(216, 210, 224);
+    color: black;
+    transition: .3s;
+}
+ #totalvalue {
+     background-color: rgb(73, 42, 92);
+     color: white;
+     display: flex;
+     flex-direction: column;
+ }
+#totalvalue .datetitle {
+    text-decoration: none;
+    font-size: 2em;
+    font-weight: 300;
+    margin-bottom: .5em;
+    margin-top: 0;
+}
+button {
+    width: 50%;
+    margin: auto;
+    margin-top: 1em;
+    border: none;
+    border-radius: 3em;
+    padding: 1em;
+    background-color: rgb(218, 210, 224);
+    font-weight: 600;
+    font-size: 1em;
+    transition: .3s;
+}
+button:hover, input:hover{
+    background-color: rgb(201, 193, 206);   
+}
+ #totalvalue h3 {
+     text-align: center;
+     margin-bottom: 0;
+     margin-top: 2em;
+     font-weight: 200;
+     text-decoration: underline;
+ }
+ #totalvalue div div {
+     display: flex;
+     flex-direction: column;
+     margin: 1em;
+     background-color: white;
+     color: black;
+     padding: 1.5em;
+     border-radius: 2em;
+ }
+ .dates {
+     height: 100%;
+ }
+ #totalval {
+     font-weight: 500;
+     font-size: 6em;
+     margin: 0;
+     padding-top: 0;
+ }
+ #val {
+     display: flex;
+     flex-direction: column;
+     background-color: black;
+     color: lightgrey;
+     padding: 0 0 10em 0;
+ }
+
+ #names h3 {
+    font-weight: 300;
+    font-size: 1.5em;
+    padding: 0 1em;
+ }
+ #names h3 span {
+     font-size: 2em;
+ }
+
+#names span{
+    font-weight: 400;
+    color: white;
+}
+div {
+    padding: 1em;
+    width: auto;
+    font-size: 1.05em;
+}
+#wallettitle {
+    text-decoration: underline;
+    font-size: 1.2em;
+    font-weight: 200;
+    text-align: center;
+    margin: 3em 0 -1em 0;
+    color: rgb(246, 214, 255)
+}

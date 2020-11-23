@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Crypto Portfolio Viewer</title>
+        <meta name="description" content="An investment dashboard app made for Genesis Block Capital">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type = "text/css" href="style.css">
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    </head>
+    <body>
+            <div id = "portfolio">
+                <div id = "totalvalue">
+                    <br>
+                    <br>
+                    <br>
+                    <p id = "title">Personal Portfolio</p>
+                    <h1 id = "btitle">Cryptofolio</h1>
+                    <h3>PORTFOLIO VALUE: </h3>
+                    <h1 id = "totalval">$0</h1>
+                    <div class="inputs">
+                        <div class = "dates">
+                            <h3 class = "datetitle">Select Date:</h3>
+                            <input type = "date" id = "dateselector">
+                            <button onclick = "enterDate()">Enter</button>
+                        </div>
+                        <div>
+                            <h3 class = "datetitle">Wallet Addresses:</h3>
+                            <input type = "text" id = "btcwalletaddr" placeholder = "Bitcoin">
+                            <input type = "text" id = "ethwalletaddr" placeholder = "Ethereum">
+                            <input type = "text" id = "xtzwalletaddr" placeholder = "Tezos">
+                            <button onclick = "enterAddr()">Enter</button>
+                        </div>
+                    </div>
+                </div>
+                <div id = "val">
+                    <h3 id = "wallettitle">Wallet</h3>
+                    <div id = "names">
+                        <!-- for if we need to add many more coins <h2>Coins</h2> -->
+                        <h3>Bitcoin: <span id = "btc"></span></h3>
+                        <h3>Ethereum: <span id = "eth"></span></h3>
+                        <h3>Tezos: <span id = "xtz"></span></h3>
+                    </div>
+                </div>
+            </div>
+        
+        <script async defer>
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+            }  
+
+            var apikey = {
+                cmckey: 'cca25091-2a4a-43f3-855b-e760a8aa859f',
+                nomkey: 'e0bdb8da144feffafbc48029d74173ef',
+
+                ethkey: 'MD4QV2Q5U6F7TSKKQQ73INFWXJSFRCJQDK',
+                
+                btckey: '9f52fe5a-3aa9-437e-ba1f-11f15baf4384',
+
+                xtzkey: 'KT1Ev2jNfMXYvxpMSqdn6dcunb2RqGEm56o9'
+            }
+
+            var totalvalue = 0  
+            var btcprice = 0
+            var ethprice = 0
+            var xtzprice = 0
+            var btcval = 0
+            var ethval = 0
+            var xtzval = 0
+            var btcaddr = ''
+            var ethaddr = ''
+            var xtzaddr = ''
+
+            function request(method, url) {
+                    return new Promise(function (resolve, reject) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.open(method, url);
+                        xhr.onload = resolve;
+                        xhr.onerror = reject;
+                        xhr.send();
+                    });
+            }
+            function enterAddr() {
+                var btcaddrselector = document.getElementById("btcwalletaddr")
+                var ethaddrselector = document.getElementById("ethwalletaddr")
+                var xtzaddrselector = document.getElementById("xtzwalletaddr")
+                btcaddr = btcaddrselector.value
+                ethaddr = ethaddrselector.value
+                xtzaddr = xtzaddrselector.value
+
+                // coin market cap API for coin prices
+                request('GET','https://cors-anywhere.herokuapp.com/https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?CMC_PRO_API_KEY=' + apikey.cmckey)
+                .then((response) => {
+                    var x = JSON.parse(response.target.responseText)
+                    for(let i = 0; i < 100; i++) {
+                        if(x.data[i].name == "Bitcoin") {
+                            btcprice = x.data[i].quote.USD.price
+                        }
+                        if(x.data[i].name == "Ethereum") {
+                            ethprice = x.data[i].quote.USD.price
+                        }
+                        if(x.data[i].name == "Tezos") {
+                            xtzprice = x.data[i].quote.USD.price
+                        }
+                    }
+                    // eth wallet API
+                    if(ethaddr !== '') {
+                        request('GET','https://cors-anywhere.herokuapp.com/https://api.etherscan.io/api?module=account&action=balance&address=' + ethaddr + '&tag=latest&apikey=' + apikey.ethkey)
+                        .then((response) => {
+                            var y = JSON.parse(response.target.responseText)
+                            ethval = y.result/1000000000000000000
+                            var ethval1 = numberWithCommas((y.result/1000000000000000000).toFixed(2))
+                            document.getElementById("eth").innerHTML = ethval1 + " ETH"
+                            totalvalue += ethval * ethprice
+                            var totalvalue1 = numberWithCommas(totalvalue.toFixed(2))
+                            document.getElementById("totalval").innerHTML = "$" + totalvalue1
+                        })
+                    }
+                    // btc wallet API
+                    if(btcaddr !== '') {
+                        request('GET','https://cors-anywhere.herokuapp.com/https://api.blockcypher.com/v1/btc/main/addrs/' + btcaddr + '/balance')
+                        .then((response) => {
+                            var z = JSON.parse(response.target.responseText)
+                            btcval = z.final_balance/100000000
+                            document.getElementById("btc").innerHTML = btcval + " BTC"
+                            totalvalue += btcval * btcprice
+                            var totalvalue1 = numberWithCommas(totalvalue.toFixed(2))
+                            document.getElementById("totalval").innerHTML = "$" + totalvalue1
+                            console.log(z)
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }
+                    // tezos API
+                    if(xtzaddr !== '') {
+                    request('GET','https://cors-anywhere.herokuapp.com/https://api.tzstats.com/explorer/account/' + xtzaddr)
+                    .then((response) => {
+                        var z = JSON.parse(response.target.response)
+                        xtzval = z.total_balance
+                        var xtzval1 = numberWithCommas(z.total_balance.toFixed(2))
+                        document.getElementById("xtz").innerHTML = xtzval1 + " XTZ"
+                        totalvalue += xtzval * xtzprice
+                        var totalvalue1 = numberWithCommas(totalvalue.toFixed(2))
+                        document.getElementById("totalval").innerHTML = "$" + totalvalue1
+                    })
+                }
+            }
+            }
+            function enterDate() {
+                var dateselector = document.getElementById("dateselector")
+                var date = dateselector.value
+
+                request('GET','https://cors-anywhere.herokuapp.com/https://api.nomics.com/v1/exchange-rates/history?key=' + apikey.nomkey + '&currency=BTC&start=' + date + 'T23%3A00%3A00Z&end=' + date + 'T23%3A59%3A00Z')
+                .then((response) => {
+                    var x = JSON.parse(response.target.responseText)
+                    btcprice = x[0].rate
+                    totalvalue = 0
+                    totalvalue += btcval * btcprice
+                    console.log(1)
+                    console.log(totalvalue)
+
+                    request('GET','https://cors-anywhere.herokuapp.com/https://api.nomics.com/v1/exchange-rates/history?key=' + apikey.nomkey + '&currency=ETH&start=' + date + 'T23%3A00%3A00Z&end=' + date + 'T23%3A59%3A00Z')
+                    .then((response) => {
+                        var x1 = JSON.parse(response.target.responseText)
+                        ethprice = x1[0].rate
+                        totalvalue += ethval * ethprice
+                        console.log(2)
+                        console.log(totalvalue)
+
+                        //available for only 90 days as of Aug 6 2020
+                        request('GET','https://cors-anywhere.herokuapp.com/https://api.tzstats.com/series/binance/XTZ_USDT/ohlcv?start_date=' + date + 'T03:59:00Z&end_date=' + date + 'T03:59:00Z')
+                        .then((response) => {
+                            var x = JSON.parse(response.target.responseText)
+                            xtzprice = x[0][1]
+                            totalvalue += xtzval * xtzprice
+                            console.log(3)
+                            console.log(totalvalue)
+
+                            totalvalue = totalvalue.toString()
+                            totalvalue = numberWithCommas(parseFloat(totalvalue).toFixed(2))
+                            document.getElementById("totalval").innerHTML = "$" + totalvalue
+                        }).catch(err => {
+                            console.log(err)
+                        })
+                    }).catch(err => {
+                        console.log(err)
+                    })
+                }).catch(err => {
+                    console.log(err)
+                })
+            }
+            
+            
+        </script>
+        <script>
+        </script>
+    </body>
+</html>
+
+<html>
