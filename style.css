@@ -94,11 +94,10 @@ button:hover, input:hover{
 #enteraddrbutton {
     width: 60%;
 }
- #totalvalue h3 {
+ #totalvalue h3,#totalvalue h4 {
      text-align: center;
      margin-top: 0;
      font-weight: 200;
-     text-decoration: underline;
  }
  .coinselectorsection{
      display: flex;
@@ -113,6 +112,33 @@ button:hover, input:hover{
      background-color: white;
     border-radius: 2em;
     color: black;
+    padding: 1.5em;
+ }
+ #step3 {
+     margin-top: 3em;
+ }
+ #wavyarrow {
+     width: 20px;
+     height: 20px;
+     border-right: white 3px solid;
+     border-bottom: white 3px solid;
+     display: block;
+     transform: rotate(45deg);
+     -webkit-transform: rotate(45deg);
+     margin: auto;
+     left: 50%;
+     position: absolute;
+     animation: updown 1s linear infinite;
+    -webkit-animation: updown 1s linear infinite;
+ }
+
+ @keyframes updown {
+     0%, 100% {
+         bottom: 0;
+     }
+     50% {
+        bottom: 5px;
+     }
  }
  .resetbutton {
      background-color: white;
