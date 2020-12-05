@@ -14,15 +14,11 @@ var apikey = {
 }
 
 var totalvalue = 0  
-var btcprice = 0
-var ethprice = 0
-var xtzprice = 0
-var btcval = 0
-var ethval = 0
-var xtzval = 0
-var btcaddr = ''
-var ethaddr = ''   
-var xtzaddr = ''
+var btcprice,ethprice,xtzprice,ltcprice = 0
+
+var btcval,ethval,xtzval,ltcval = 0
+
+var btcaddr,ethaddr,xtzaddr,ltcaddr = ''
 
 var errflag = 0;
 
@@ -40,6 +36,7 @@ function enterAddr() {
     var enterCoinButton = document.getElementById("enterCoin")
     enterCoinButton.style.opacity = "0";
     dateselector.style.opacity = "1";
+    
     var btcaddrselector = document.getElementById("btcwalletaddr")
     var ethaddrselector = document.getElementById("ethwalletaddr")
     var xtzaddrselector = document.getElementById("xtzwalletaddr")
@@ -69,9 +66,11 @@ function enterAddr() {
         }
     })
         // eth wallet API
+        if(eth.checked) {
             request('GET','https://cors-anywhere.herokuapp.com/https://api.etherscan.io/api?module=account&action=balance&address=' + ethaddr + '&tag=latest&apikey=' + apikey.ethkey)
             .then((response) => {
                 var y = JSON.parse(response.target.responseText)
+                console.log("eth: y")
                 ethval = y.result/1000000000000000000
                 var ethval1 = numberWithCommas((y.result/1000000000000000000).toFixed(2))
                 document.getElementById("eth").innerHTML = ethval1 + " ETH"
@@ -85,11 +84,12 @@ function enterAddr() {
                     ethtag.style.display="block";
                 }
             })
-        
+        }
         // btc wallet API
         if(btc.checked) {
         request('GET','https://cors-anywhere.herokuapp.com/https://api.blockcypher.com/v1/btc/main/addrs/' + btcaddr + '/balance')
             .then((response) => {
+            console.log(response);
             var z = JSON.parse(response.target.responseText)
             btcval = z.final_balance/100000000
             document.getElementById("btc").innerHTML = btcval + " BTC"
@@ -102,15 +102,42 @@ function enterAddr() {
                 btctag.style.display="block";
             }
             console.log(errflag)
-        }).catch(err => {
-        })
-    }
-
+            }).catch(err => {
+            })
+        }
+        
+        if(ltc.checked) {
+        request('GET','https://cors-anywhere.herokuapp.com/https://api.blockcypher.com/v1/ltc/main/addrs/' + ltcaddr + '/balance')
+            .then((response) => {
+            console.log(response);
+            var z = JSON.parse(response.target.responseText)
+            ltcval = z.final_balance/100000000
+            document.getElementById("ltc").innerHTML = ltcval + " LTC"
+            totalvalue += ltcval * ltcprice
+            var totalvalue1 = numberWithCommas(totalvalue.toFixed(2))
+            document.getElementById("totalval").innerHTML = "$" + totalvalue1
+            if(isNaN(ltcval) || !ltcaddr) {
+                error.innerHTML = "Error: invalid address";
+            } else {
+                ltctag.style.display="block";
+            }
+            console.log(errflag)
+            }).catch(err => {
+            })
+        }
         // tezos API
-        request('GET','https://cors-anywhere.herokuapp.com/https://api.tzstats.com/explorer/account/' + xtzaddr)
+    if(xtz.checked) {
+        // fix this: cant get error to show up on empty xtzaddr
+        // console.log(xtzaddr)
+        // if(xtzaddr==="") {
+        //     xtztag.style.display="block";
+        // }
+        // xtzaddr=base58.encode(xtzaddr)
+        request('GET','https://cors-anywhere.herokuapp.com/https://api.tzstats.com/explorer/account/'+xtzaddr)
         .then((response) => {
             var z = JSON.parse(response.target.response)
             console.log(response)
+            console.log(z)
             xtzval = z.total_balance
             var xtzval1 = numberWithCommas(z.total_balance.toFixed(2))
             document.getElementById("xtz").innerHTML = xtzval1 + " XTZ"
@@ -118,14 +145,15 @@ function enterAddr() {
             var totalvalue1 = numberWithCommas(totalvalue.toFixed(2))
             document.getElementById("totalval").innerHTML = "$" + totalvalue1
             
-            if(isNaN(xtzval) || !xtzaddr) {
+            console.log("THIS IS IT:" + xtzaddr)
+            if(isNaN(xtzval)) {
                 error.innerHTML = "Error: invalid address";
                 console.log("error!")
             } else {
                 xtztag.style.display="block";
             }
             })
-        
+    }   
 
         // error handling
     //     var error = document.getElementById("error");
@@ -138,18 +166,21 @@ function enterAddr() {
     var btc = document.getElementById("addbtc")
     var eth = document.getElementById("addeth")
     var xtz = document.getElementById("addxtz")
-function enterCoinFunc() {
+    var ltc = document.getElementById("addltc")
+function enterCoin() {
 
     console.log("enterCoin function")
     var btcaddrselector = document.getElementById("btcwalletaddr")
     var ethaddrselector = document.getElementById("ethwalletaddr")
     var xtzaddrselector = document.getElementById("xtzwalletaddr")
+    var ltcaddrselector = document.getElementById("ltcwalletaddr")
+
     var button = document.getElementById("enteraddrbutton")
     var oldbutton = document.getElementById("enterCoin")
     var txt = document.getElementById("selectaddrtxt")
 
-    var cryptoarray = [btc, eth, xtz]
-    var selectorarray = [btcaddrselector, ethaddrselector, xtzaddrselector]
+    var cryptoarray = [btc, eth, xtz,ltc]
+    var selectorarray = [btcaddrselector, ethaddrselector, xtzaddrselector,ltcaddrselector]
     
     for(var i = 0; i < cryptoarray.length; i++) {
         for(var j = 0; j < selectorarray.length; j++) {
@@ -161,22 +192,13 @@ function enterCoinFunc() {
             }
         }
     }
-    if(btc.checked) {
-        btcaddrselector.style.display="block";
-        console.log("test");
-    }
-    if(eth=="on") {
-        ethaddrselector.style.display="block";
-    }
-    if(xtz=="on") {
-        xtzaddrselector.style.display="block";
-        
-    }
-    console.log("a");
+
 }
 function enterDate() {
     var dateselector = document.getElementById("dateselector")
     var date = dateselector.value
+    var stepthree = document.getElementById("step3")
+    step3.style.opacity = "1";
 
     request('GET','https://cors-anywhere.herokuapp.com/https://api.nomics.com/v1/exchange-rates/history?key=' + apikey.nomkey + '&currency=BTC&start=' + date + 'T23%3A00%3A00Z&end=' + date + 'T23%3A59%3A00Z')
     .then((response) => {
@@ -219,14 +241,16 @@ function enterDate() {
 }
 
 function reset() {
-    console.log("test")
     var inputfields = 
     [document.getElementById("addbtc"),
     document.getElementById("addeth"),
     document.getElementById("addxtz"),
+    document.getElementById("addltc"),
     document.getElementById("btcwalletaddr"),
     document.getElementById("ethwalletaddr"),
-    document.getElementById("xtzwalletaddr")]
+    document.getElementById("xtzwalletaddr"),
+    document.getElementById("ltcwalletaddr")]
     inputfields.forEach(x=>x.type="reset");
     window.location.reload();
+
 }
