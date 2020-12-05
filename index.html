@@ -13,19 +13,28 @@
     </head>
     <body>
             <div id = "portfolio">
-                <p id="step1">Wallet addresses for each cryptocurrency is required (more coins coming soon)</p>
+                <p id="step1">Wallet addresses for each cryptocurrency is required <span style="font-size: .7em; display: block;">(more coins coming soon, Safari currently not supported)</span></p>
                 <div id = "totalvalue">
                     <p id = "title">Crypto Portfolio Viewer</p>
                     <div class="inputs">
                         <div id="innercolumn">
                             <div class = "dates" id="datesid" style="opacity:0;">
-                                <h3 class = "datetitle">Select Date:<p style="font-size: .3em;">(leave blank for current values)</p></h3>
+                                <h4><b>Step 2: <br></b></h4>
+                                <h3 class = "datetitle">
+                                    Select Date:<p style="font-size: .3em;">(leave blank for current values)</p>
+                                </h3>
                                 <input type = "date" id = "dateselector">
                                 <button onclick = "enterDate()" style="width: 100%;">Enter</button>
                             </div>
+                            <div id="step3" style="opacity:0;">
+                            <h3><b>Step 3:</b> Scroll to view<br> portfolio value</h3>
+                            <div style="position: relative; margin: auto;">
+                                <span id="wavyarrow"></span>
+                            </div>
+                            </div>
                         </div>
                         <div class="coinselectorsection">
-                            <h3 style="text-decoration: none;">Select coins to add<br>to portfolio:</h3>
+                            <h3 style="text-decoration: none;"><b>Step 1: </b><br>Select coins to add<br>to portfolio:</h3>
                             <div id="coinselector">
                                 <div>
                                     <input type="checkbox" id="addbtc" name="vehicle1" value="BTC">
@@ -38,6 +47,10 @@
                                 <div>
                                     <input type="checkbox" id="addxtz" name="vehicle3" value="XTZ">
                                     <label for="addxtz"> XTZ</label><br> 
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="addltc" name="vehicle1" value="LTC">
+                                    <label for="addltc"> LTC</label><br>
                                 </div>
                                 <button id="enterCoin" onclick="enterCoin()">Enter</button>
                                 <h3 style=
@@ -54,6 +67,7 @@
                                 <input type = "text" id = "btcwalletaddr" placeholder = "Bitcoin Wallet Address" style="display: none;">
                                 <input type = "text" id = "ethwalletaddr" placeholder = "Ethereum Wallet Address" style="display: none;">
                                 <input type = "text" id = "xtzwalletaddr" placeholder = "Tezos Wallet Address" style="display: none;">
+                                <input type = "text" id = "ltcwalletaddr" placeholder = "Litecoin Wallet Address" style="display: none;">
                                 <button onclick = "enterAddr()" style="display: none;" id="enteraddrbutton">Enter</button>
                             </div>
                         </div>
@@ -64,10 +78,7 @@
                 <div id = "val">
                     <h3 id = "wallettitle">Wallet</h3>
                     <h1 id = "totalval">$0</h1>
-                    <div style="position: relative; height:50vh; width:80vw">
-                        <canvas id="chart" width="100" height="50"></canvas>
-                    </div>
-        
+                 
                     <h1 id = "btitle"></h1>
                     <h3 style="padding: 0 2em;">PORTFOLIO VALUE: </h3>
                     <div id = "names">
@@ -75,6 +86,7 @@
                         <h3 id="btctag" style="display:none;">Bitcoin: <span id = "btc"></span></h3>
                         <h3 id="ethtag" style="display:none;">Ethereum: <span id = "eth"></span></h3>
                         <h3 id="xtztag" style="display:none;">Tezos: <span id = "xtz"></span></h3>
+                        <h3 id="ltctag" style="display:none;">Litecoin: <span id = "ltc"></span></h3>
                     </div>
                 </div>
             </div>
@@ -125,15 +137,11 @@ var myChart = new Chart(ctx, {
             }
 
             var totalvalue = 0  
-            var btcprice = 0
-            var ethprice = 0
-            var xtzprice = 0
-            var btcval = 0
-            var ethval = 0
-            var xtzval = 0
-            var btcaddr = ''
-            var ethaddr = ''   
-            var xtzaddr = ''
+            var btcprice,ethprice,xtzprice,ltcprice = 0
+    
+            var btcval,ethval,xtzval,ltcval = 0
+            
+            var btcaddr,ethaddr,xtzaddr,ltcaddr = ''
 
             var errflag = 0;
 
@@ -151,6 +159,7 @@ var myChart = new Chart(ctx, {
                 var enterCoinButton = document.getElementById("enterCoin")
                 enterCoinButton.style.opacity = "0";
                 dateselector.style.opacity = "1";
+                
                 var btcaddrselector = document.getElementById("btcwalletaddr")
                 var ethaddrselector = document.getElementById("ethwalletaddr")
                 var xtzaddrselector = document.getElementById("xtzwalletaddr")
@@ -180,9 +189,11 @@ var myChart = new Chart(ctx, {
                     }
                 })
                     // eth wallet API
+                    if(eth.checked) {
                         request('GET','https://cors-anywhere.herokuapp.com/https://api.etherscan.io/api?module=account&action=balance&address=' + ethaddr + '&tag=latest&apikey=' + apikey.ethkey)
                         .then((response) => {
                             var y = JSON.parse(response.target.responseText)
+                            console.log("eth: y")
                             ethval = y.result/1000000000000000000
                             var ethval1 = numberWithCommas((y.result/1000000000000000000).toFixed(2))
                             document.getElementById("eth").innerHTML = ethval1 + " ETH"
@@ -196,11 +207,12 @@ var myChart = new Chart(ctx, {
                                 ethtag.style.display="block";
                             }
                         })
-                    
+                    }
                     // btc wallet API
                     if(btc.checked) {
                     request('GET','https://cors-anywhere.herokuapp.com/https://api.blockcypher.com/v1/btc/main/addrs/' + btcaddr + '/balance')
                         .then((response) => {
+                        console.log(response);
                         var z = JSON.parse(response.target.responseText)
                         btcval = z.final_balance/100000000
                         document.getElementById("btc").innerHTML = btcval + " BTC"
@@ -213,15 +225,42 @@ var myChart = new Chart(ctx, {
                             btctag.style.display="block";
                         }
                         console.log(errflag)
-                    }).catch(err => {
-                    })
-                }
-            
+                        }).catch(err => {
+                        })
+                    }
+                    
+                    if(ltc.checked) {
+                    request('GET','https://cors-anywhere.herokuapp.com/https://api.blockcypher.com/v1/ltc/main/addrs/' + ltcaddr + '/balance')
+                        .then((response) => {
+                        console.log(response);
+                        var z = JSON.parse(response.target.responseText)
+                        ltcval = z.final_balance/100000000
+                        document.getElementById("ltc").innerHTML = ltcval + " LTC"
+                        totalvalue += ltcval * ltcprice
+                        var totalvalue1 = numberWithCommas(totalvalue.toFixed(2))
+                        document.getElementById("totalval").innerHTML = "$" + totalvalue1
+                        if(isNaN(ltcval) || !ltcaddr) {
+                            error.innerHTML = "Error: invalid address";
+                        } else {
+                            ltctag.style.display="block";
+                        }
+                        console.log(errflag)
+                        }).catch(err => {
+                        })
+                    }
                     // tezos API
-                    request('GET','https://cors-anywhere.herokuapp.com/https://api.tzstats.com/explorer/account/' + xtzaddr)
+                if(xtz.checked) {
+                    // fix this: cant get error to show up on empty xtzaddr
+                    // console.log(xtzaddr)
+                    // if(xtzaddr==="") {
+                    //     xtztag.style.display="block";
+                    // }
+                    // xtzaddr=base58.encode(xtzaddr)
+                    request('GET','https://cors-anywhere.herokuapp.com/https://api.tzstats.com/explorer/account/'+xtzaddr)
                     .then((response) => {
                         var z = JSON.parse(response.target.response)
                         console.log(response)
+                        console.log(z)
                         xtzval = z.total_balance
                         var xtzval1 = numberWithCommas(z.total_balance.toFixed(2))
                         document.getElementById("xtz").innerHTML = xtzval1 + " XTZ"
@@ -229,14 +268,15 @@ var myChart = new Chart(ctx, {
                         var totalvalue1 = numberWithCommas(totalvalue.toFixed(2))
                         document.getElementById("totalval").innerHTML = "$" + totalvalue1
                         
-                        if(isNaN(xtzval) || !xtzaddr) {
+                        console.log("THIS IS IT:" + xtzaddr)
+                        if(isNaN(xtzval)) {
                             error.innerHTML = "Error: invalid address";
                             console.log("error!")
                         } else {
                             xtztag.style.display="block";
                         }
                         })
-                    
+                }   
 
                     // error handling
                 //     var error = document.getElementById("error");
@@ -249,18 +289,21 @@ var myChart = new Chart(ctx, {
                 var btc = document.getElementById("addbtc")
                 var eth = document.getElementById("addeth")
                 var xtz = document.getElementById("addxtz")
+                var ltc = document.getElementById("addltc")
             function enterCoin() {
             
                 console.log("enterCoin function")
                 var btcaddrselector = document.getElementById("btcwalletaddr")
                 var ethaddrselector = document.getElementById("ethwalletaddr")
                 var xtzaddrselector = document.getElementById("xtzwalletaddr")
+                var ltcaddrselector = document.getElementById("ltcwalletaddr")
+
                 var button = document.getElementById("enteraddrbutton")
                 var oldbutton = document.getElementById("enterCoin")
                 var txt = document.getElementById("selectaddrtxt")
 
-                var cryptoarray = [btc, eth, xtz]
-                var selectorarray = [btcaddrselector, ethaddrselector, xtzaddrselector]
+                var cryptoarray = [btc, eth, xtz,ltc]
+                var selectorarray = [btcaddrselector, ethaddrselector, xtzaddrselector,ltcaddrselector]
                 
                 for(var i = 0; i < cryptoarray.length; i++) {
                     for(var j = 0; j < selectorarray.length; j++) {
@@ -272,22 +315,13 @@ var myChart = new Chart(ctx, {
                         }
                     }
                 }
-                if(btc.checked) {
-                    btcaddrselector.style.display="block";
-                    console.log("test");
-                }
-                if(eth=="on") {
-                    ethaddrselector.style.display="block";
-                }
-                if(xtz=="on") {
-                    xtzaddrselector.style.display="block";
-                    
-                }
-                console.log("a");
+
             }
             function enterDate() {
                 var dateselector = document.getElementById("dateselector")
                 var date = dateselector.value
+                var stepthree = document.getElementById("step3")
+                step3.style.opacity = "1";
 
                 request('GET','https://cors-anywhere.herokuapp.com/https://api.nomics.com/v1/exchange-rates/history?key=' + apikey.nomkey + '&currency=BTC&start=' + date + 'T23%3A00%3A00Z&end=' + date + 'T23%3A59%3A00Z')
                 .then((response) => {
@@ -334,9 +368,11 @@ var myChart = new Chart(ctx, {
                 [document.getElementById("addbtc"),
                 document.getElementById("addeth"),
                 document.getElementById("addxtz"),
+                document.getElementById("addltc"),
                 document.getElementById("btcwalletaddr"),
                 document.getElementById("ethwalletaddr"),
-                document.getElementById("xtzwalletaddr")]
+                document.getElementById("xtzwalletaddr"),
+                document.getElementById("ltcwalletaddr")]
                 inputfields.forEach(x=>x.type="reset");
                 window.location.reload();
 
@@ -352,4 +388,6 @@ var myChart = new Chart(ctx, {
             <a href="https://www.instagram.com/samshi12/?hl=en" class="fa fa-instagram"></a>
         </div>
     </footer>
+</html>
 
+<html>
